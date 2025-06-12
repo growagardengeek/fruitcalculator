@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Grow a Garden - Sell Price Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+    /* Reset and base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      color: #e2e8f0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 32px 16px;
+    }
+    /* Container with glassmorphism */
+    .container {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: saturate(180%) blur(16px);
+      -webkit-backdrop-filter: saturate(180%) blur(16px);
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+      max-width: 480px;
+      width: 100%;
+      padding: 32px 32px 40px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    h1 {
+      font-weight: 800;
+      font-size: 2.25rem;
+      text-align: center;
+      color: #f8fafc;
+      margin-bottom: 8px;
+      user-select: none;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      user-select: none;
+    }
+
+    select {
+      font-size: 1rem;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: none;
+      width: 100%;
+      background-color: #0f172a;
+      color: #f1f5f9;
+      box-shadow: inset 0 0 8px rgba(255 255 255 / 0.1);
+      transition: box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+    select:hover, select:focus {
+      box-shadow: 0 0 12px #8b5cf6;
+      outline: none;
+    }
+
+    /* Modifiers flex grid */
+    .modifiers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px 20px;
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    /* Scrollbar styling */
+    .modifiers::-webkit-scrollbar {
+      width: 6px;
+    }
+    .modifiers::-webkit-scrollbar-thumb {
+      background-color: #7c3aed;
+      border-radius: 6px;
+      border: 1px solid transparent;
+    }
+    .modifiers::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    /* Modifier label and checkbox styling */
+    .modifier-label {
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      border-radius: 12px;
+      padding: 8px 12px;
+      background-color: #1e293b;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.15);
+    }
+    .modifier-label:hover {
+      background-color: #312e81;
+      box-shadow: 0 0 8px #8b5cf6;
+      color: #e0e7ff;
+    }
+
+    .modifier-label input[type="checkbox"] {
+      accent-color: #8b5cf6;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      flex-shrink: 0;
+      border-radius: 6px;
+      border: 1.5px solid #94a3b8;
+      transition: border-color 0.3s ease;
+    }
+    .modifier-label input[type="checkbox"]:hover {
+      border-color: #a78bfa;
+    }
+    .modifier-label input[type="checkbox"]:focus-visible {
+      outline-offset: 2px;
+      outline: 2px solid #a78bfa;
+    }
+
+    /* Button */
+    button {
+      margin-top: 8px;
+      background-image: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+      border: none;
+      color: #f8fafc;
+      font-size: 1.125rem;
+      font-weight: 700;
+      padding: 14px 0;
+      border-radius: 16px;
+      cursor: pointer;
+      box-shadow: 0 8px 15px rgba(107,99,255,0.4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      transition: box-shadow 0.3s ease, transform 0.2s ease;
+      user-select: none;
+    }
+    button:hover {
+      box-shadow: 0 12px 25px rgba(107,99,255,0.7);
+      transform: translateY(-2px);
+    }
+    button:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 10px rgba(107,99,255,0.5);
+    }
+
+    .material-icons {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    /* Result */
+    .result {
+      margin-top: 20px;
+      font-size: 1.3rem;
+      font-weight: 800;
+      text-align: center;
+      color: #c7d2fe;
+      min-height: 32px;
+      user-select: text;
+      word-break: break-word;
+    }
+
+    /* Responsive */
+    @media (max-width: 500px) {
+      .container {
+        max-width: 100%;
+        padding: 24px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container" role="main" aria-label="Grow a Garden Sell Price Calculator">
+    <h1>Grow a Garden</h1>
+    <label for="fruit-select">Select a Fruit</label>
+    <select id="fruit-select" aria-describedby="fruit-desc">
+      <option value="carrot">Carrot</option>
+      <option value="pumpkin">Pumpkin</option>
+      <option value="melon">Melon</option>
+      <option value="cucumber">Cucumber</option>
+      <option value="tomato">Tomato</option>
+      <option value="mushroom">Mushroom</option>
+      <option value="bamboo">Bamboo</option>
+      <option value="apple">Apple</option>
+      <option value="coconut">Coconut</option>
+      <option value="cactus">Cactus</option>
+      <option value="mango">Mango</option>
+      <option value="dragonFruit">Dragon Fruit</option>
+      <option value="appleTree">Apple Tree</option>
+      <option value="mangoTree">Mango Tree</option>
+      <option value="coconutTree">Coconut Tree</option>
+      <option value="tomatoVine">Tomato Vine</option>
+    </select>
+    <p id="fruit-desc" style="color:#94a3b8; font-size:0.875rem; margin-top:-16px; margin-bottom:24px;">Choose your fruit to calculate its sell price with modifiers.</p>
+
+    <fieldset>
+      <legend style="font-weight: 700; font-size: 1.125rem; margin-bottom: 12px;">Select Modifiers</legend>
+      <div class="modifiers" role="group" aria-label="Fruit Modifiers">
+        <label class="modifier-label" for="wet">
+          <input type="checkbox" id="wet" value="2" /> Wet (2×)
+        </label>
+        <label class="modifier-label" for="chilled">
+          <input type="checkbox" id="chilled" value="2" /> Chilled (2×)
+        </label>
+        <label class="modifier-label" for="frozen">
+          <input type="checkbox" id="frozen" value="10" /> Frozen (10×)
+        </label>
+        <label class="modifier-label" for="moonlit">
+          <input type="checkbox" id="moonlit" value="2" /> Moonlit (2×)
+        </label>
+        <label class="modifier-label" for="bloodlit">
+          <input type="checkbox" id="bloodlit" value="4" /> Bloodlit (4×)
+        </label>
+        <label class="modifier-label" for="pollinated">
+          <input type="checkbox" id="pollinated" value="3" /> Pollinated (3×)
+        </label>
+        <label class="modifier-label" for="honeyGlazed">
+          <input type="checkbox" id="honeyGlazed" value="5" /> HoneyGlazed (5×)
+        </label>
+        <label class="modifier-label" for="chocolate">
+          <input type="checkbox" id="chocolate" value="2" /> Chocolate (2×)
+        </label>
+        <label class="modifier-label" for="gold">
+          <input type="checkbox" id="gold" value="20" /> Gold (20×)
+        </label>
+        <label class="modifier-label" for="rainbow">
+          <input type="checkbox" id="rainbow" value="50" /> Rainbow (50×)
+        </label>
+        <label class="modifier-label" for="shocked">
+          <input type="checkbox" id="shocked" value="100" /> Shocked (100×)
+        </label>
+        <label class="modifier-label" for="zombified">
+          <input type="checkbox" id="zombified" value="25" /> Zombified (25×)
+        </label>
+        <label class="modifier-label" for="celestial">
+          <input type="checkbox" id="celestial" value="120" /> Celestial (120×)
+        </label>
+        <label class="modifier-label" for="twisted">
+          <input type="checkbox" id="twisted" value="30" /> Twisted (30×)
+        </label>
+        <label class="modifier-label" for="plasma">
+          <input type="checkbox" id="plasma" value="5" /> Plasma (5×)
+        </label>
+        <label class="modifier-label" for="heavenly">
+          <input type="checkbox" id="heavenly" value="5" /> Heavenly (5×)
+        </label>
+        <label class="modifier-label" for="disco">
+          <input type="checkbox" id="disco" value="125" /> Disco (125×)
+        </label>
+        <label class="modifier-label" for="voidtouched">
+          <input type="checkbox" id="voidtouched" value="135" /> Voidtouched (135×)
+        </label>
+        <label class="modifier-label" for="dawnbound">
+          <input type="checkbox" id="dawnbound" value="150" /> Dawnbound (150×)
+        </label>
+      </div>
+    </fieldset>
+
+    <button id="calculateBtn" aria-label="Calculate sell price">
+      <span class="material-icons" aria-hidden="true">calculate</span>
+      Calculate Sell Price
+    </button>
+
+    <div class="result" id="result" role="status" aria-live="polite"></div>
+  </main>
+
+  <script>
+    const basePrices = {
+      carrot: 10,
+      pumpkin: 15,
+      melon: 20,
+      cucumber: 12,
+      tomato: 18,
+      mushroom: 8,
+      bamboo: 25,
+      apple: 30,
+      coconut: 35,
+      cactus: 40,
+      mango: 50,
+      dragonFruit: 60,
+      appleTree: 100,
+      mangoTree: 120,
+      coconutTree: 110,
+      tomatoVine: 90
+    };
+
+    const calculateBtn = document.getElementById("calculateBtn");
+    const fruitSelect = document.getElementById("fruit-select");
+    const resultDiv = document.getElementById("result");
+
+    function calculateSellPrice() {
+      const fruit = fruitSelect.value;
+      let basePrice = basePrices[fruit];
+      if (basePrice === undefined) {
+        resultDiv.textContent = "Please select a valid fruit.";
+        return;
+      }
+      let totalMultiplier = 1;
+      const modifiers = document.querySelectorAll('.modifiers input[type="checkbox"]:checked');
+      modifiers.forEach((checkbox) => {
+        // Multiply safely
+        const val = parseFloat(checkbox.value);
+        if (!isNaN(val) && val > 0) {
+          totalMultiplier *= val;
+        }
+      });
+
+      const finalPrice = basePrice * totalMultiplier;
+      const formattedPrice = finalPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      resultDiv.textContent = `Sell Price: $${formattedPrice}`;
+    }
+
+    calculateBtn.addEventListener("click", calculateSellPrice);
+
+    // Optional: calculate automatically upon changing fruit or modifiers
+    fruitSelect.addEventListener("change", () => {
+      resultDiv.textContent = "";
+    });
+    document.querySelectorAll('.modifiers input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        resultDiv.textContent = "";
+      });
+    });
+  </script>
+</body>
+</html>
+
