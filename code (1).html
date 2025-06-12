@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Grow a Garden - Sell Price Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+    /* Reset & base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #e0e7ff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 16px;
+      scroll-behavior: smooth;
+    }
+    /* Container with gradient blur and layering */
+    .container {
+      background: rgba(24, 39, 69, 0.85);
+      border-radius: 18px;
+      box-shadow: 0 12px 32px rgba(49, 66, 129, 0.8);
+      max-width: 520px;
+      width: 100%;
+      padding: 40px 36px 48px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      backdrop-filter: saturate(180%) blur(28px);
+      -webkit-backdrop-filter: saturate(180%) blur(28px);
+    }
+    /* Heading */
+    header {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-weight: 900;
+      font-size: 2.75rem;
+      margin-bottom: 4px;
+      line-height: 1.1;
+      color: #a78bfa;
+      text-shadow: 0 0 12px rgba(167, 139, 250, 0.6);
+      user-select: none;
+    }
+    p.subtitle {
+      font-weight: 500;
+      font-size: 1rem;
+      color: #c7d2fe;
+      margin-top: 0;
+      letter-spacing: 0.04em;
+      font-style: italic;
+      user-select: none;
+    }
+    /* Label styling */
+    label, legend {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #e0e7ff;
+      margin-bottom: 8px;
+      user-select: none;
+      display: block;
+    }
+    /* Fruit selector */
+    select {
+      font-size: 1rem;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: none;
+      width: 100%;
+      background-color: #312e81;
+      color: #e0e7ff;
+      box-shadow: inset 0 0 14px rgba(107, 99, 255, 0.5);
+      transition: box-shadow 0.3s ease, background-color 0.3s ease;
+      cursor: pointer;
+    }
+    select:hover, select:focus {
+      box-shadow: 0 0 18px #8b5cf6;
+      outline: none;
+      background-color: #3f3cbb;
+    }
+    /* Modifiers fieldset */
+    fieldset {
+      border: none;
+      padding: 0;
+    }
+    /* Modifier container grid */
+    .modifiers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px 18px;
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    /* Scrollbar styling */
+    .modifiers::-webkit-scrollbar {
+      width: 6px;
+    }
+    .modifiers::-webkit-scrollbar-thumb {
+      background-color: #a78bfa;
+      border-radius: 6px;
+      border: 1px solid transparent;
+    }
+    .modifiers::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    /* Custom checkbox style using hidden input + styled span */
+    .modifier-label {
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #dbeafe;
+      border-radius: 14px;
+      padding: 10px 16px;
+      background: #4338ca;
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.35);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+      position: relative;
+      user-select: none;
+    }
+    .modifier-label:hover {
+      background-color: #5b4ade;
+      box-shadow: 0 0 20px #a78bfa;
+      color: #eef2ff;
+    }
+    /* Hide the default checkbox */
+    .modifier-label input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      margin: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 2.5px solid #c7d2fe;
+      cursor: pointer;
+      position: relative;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+      flex-shrink: 0;
+      outline-offset: 2px;
+    }
+    /* Custom checkmark */
+    .modifier-label input[type="checkbox"]:checked {
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      border-color: #a5f3fc;
+    }
+    .modifier-label input[type="checkbox"]:checked::before {
+      content: "✔";
+      position: absolute;
+      top: 1px;
+      left: 4px;
+      font-size: 1.4rem;
+      color: #e0e7ff;
+      user-select: none;
+    }
+    .modifier-label input[type="checkbox"]:focus-visible {
+      outline: 3px solid #a78bfa;
+      outline-offset: 2px;
+    }
+    /* Button */
+    button {
+      background-image: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+      border: none;
+      color: #f8fafc;
+      font-size: 1.25rem;
+      font-weight: 800;
+      padding: 16px 0;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(107, 99, 255, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      transition: box-shadow 0.3s ease, transform 0.2s ease;
+      user-select: none;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    button:hover {
+      box-shadow: 0 18px 36px rgba(107, 99, 255, 0.8);
+      transform: translateY(-3px);
+    }
+    button:active {
+      transform: translateY(1px);
+      box-shadow: 0 6px 15px rgba(107, 99, 255, 0.6);
+    }
+    /* Material Icons styling */
+    .material-icons {
+      font-size: 28px;
+      line-height: 1;
+    }
+    /* Result area */
+    .result {
+      margin-top: 16px;
+      font-size: 1.4rem;
+      font-weight: 900;
+      text-align: center;
+      color: #d8b4fe;
+      min-height: 40px;
+      user-select: text;
+      word-break: break-word;
+      text-shadow: 0 0 5px rgba(216,180,254,0.7);
+    }
+    /* Tooltip / Helper text */
+    .helper-text {
+      font-size: 0.85rem;
+      color: #a5b4fc;
+      text-align: center;
+      font-style: italic;
+      margin-top: -16px;
+      margin-bottom: 20px;
+      user-select: none;
+    }
+    /* Responsive */
+    @media (max-width: 560px) {
+      .container {
+        max-width: 100%;
+        padding: 28px 24px 32px 24px;
+      }
+      .modifiers {
+        grid-template-columns: 1fr 1fr;
+      }
+      .material-icons {
+        font-size: 24px;
+      }
+      button {
+        font-size: 1.1rem;
+      }
+    }
+    @media (max-width: 400px) {
+      .modifiers {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container" role="main" aria-label="Grow a Garden Sell Price Calculator">
+    <header>
+      <h1>Grow a Garden</h1>
+      <p class="subtitle">Calculate fruit sell price with modifiers</p>
+    </header>
+
+    <label for="fruit-select">Select a Fruit</label>
+    <select id="fruit-select" aria-describedby="fruit-desc" title="Select a fruit to calculate its sell price">
+      <option value="carrot">🥕 Carrot</option>
+      <option value="strawberry">🍓 Strawberry</option>
+      <option value="blueberry">🫐 Blueberry</option>
+      <option value="orangeTulip">🌷 Orange Tulip</option>
+      <option value="tomato">🍅 Tomato</option>
+      <option value="corn">🌽 Corn</option>
+      <option value="daffodil">🌼 Daffodil</option>
+      <option value="watermelon">🍉 Watermelon</option>
+      <option value="pumpkin">🎃 Pumpkin</option>
+      <option value="apple">🍏 Apple</option>
+      <option value="bamboo">🎍 Bamboo</option>
+      <option value="coconut">🥥 Coconut</option>
+      <option value="cactus">🌵 Cactus</option>
+      <option value="dragonFruit">🐉 Dragon Fruit</option>
+      <option value="mango">🥭 Mango</option>
+      <option value="grape">🍇 Grape</option>
+      <option value="mushroom">🍄 Mushroom</option>
+      <option value="pepper">🌶️ Pepper</option>
+      <option value="cacao">🍫 Cacao</option>
+      <option value="beanstalk">🌱 Beanstalk</option>
+      <option value="emberLily">🌸 Ember Lily</option>
+    </select>
+    <p id="fruit-desc" class="helper-text">Choose your fruit from the list above to start.</p>
+
+    <fieldset>
+      <legend>Select Modifiers</legend>
+      <div class="modifiers" role="group" aria-label="Fruit Modifiers">
+        <label class="modifier-label" for="wet">
+          <input type="checkbox" id="wet" value="2" /> Wet (2×)
+        </label>
+        <label class="modifier-label" for="chilled">
+          <input type="checkbox" id="chilled" value="2" /> Chilled (2×)
+        </label>
+        <label class="modifier-label" for="frozen">
+          <input type="checkbox" id="frozen" value="10" /> Frozen (10×)
+        </label>
+        <label class="modifier-label" for="moonlit">
+          <input type="checkbox" id="moonlit" value="2" /> Moonlit (2×)
+        </label>
+        <label class="modifier-label" for="bloodlit">
+          <input type="checkbox" id="bloodlit" value="4" /> Bloodlit (4×)
+        </label>
+        <label class="modifier-label" for="pollinated">
+          <input type="checkbox" id="pollinated" value="3" /> Pollinated (3×)
+        </label>
+        <label class="modifier-label" for="honeyGlazed">
+          <input type="checkbox" id="honeyGlazed" value="5" /> HoneyGlazed (5×)
+        </label>
+        <label class="modifier-label" for="chocolate">
+          <input type="checkbox" id="chocolate" value="2" /> Chocolate (2×)
+        </label>
+        <label class="modifier-label" for="gold">
+          <input type="checkbox" id="gold" value="20" /> Gold (20×)
+        </label>
+        <label class="modifier-label" for="rainbow">
+          <input type="checkbox" id="rainbow" value="50" /> Rainbow (50×)
+        </label>
+        <label class="modifier-label" for="shocked">
+          <input type="checkbox" id="shocked" value="100" /> Shocked (100×)
+        </label>
+        <label class="modifier-label" for="zombified">
+          <input type="checkbox" id="zombified" value="25" /> Zombified (25×)
+        </label>
+        <label class="modifier-label" for="celestial">
+          <input type="checkbox" id="celestial" value="120" /> Celestial (120×)
+        </label>
+        <label class="modifier-label" for="twisted">
+          <input type="checkbox" id="twisted" value="30" /> Twisted (30×)
+        </label>
+        <label class="modifier-label" for="plasma">
+          <input type="checkbox" id="plasma" value="5" /> Plasma (5×)
+        </label>
+        <label class="modifier-label" for="heavenly">
+          <input type="checkbox" id="heavenly" value="5" /> Heavenly (5×)
+        </label>
+        <label class="modifier-label" for="disco">
+          <input type="checkbox" id="disco" value="125" /> Disco (125×)
+        </label>
+        <label class="modifier-label" for="voidtouched">
+          <input type="checkbox" id="voidtouched" value="135" /> Voidtouched (135×)
+        </label>
+        <label class="modifier-label" for="dawnbound">
+          <input type="checkbox" id="dawnbound" value="150" /> Dawnbound (150×)
+        </label>
+      </div>
+    </fieldset>
+
+    <button id="calculateBtn" aria-label="Calculate sell price">
+      <span class="material-icons" aria-hidden="true">calculate</span>
+      Calculate Sell Price
+    </button>
+
+    <div class="result" id="result" role="status" aria-live="polite"></div>
+  </main>
+
+  <script>
+    const basePrices = {
+      carrot: 10,
+      strawberry: 50,
+      blueberry: 400,
+      orangeTulip: 600,
+      tomato: 800,
+      corn: 1300,
+      daffodil: 1000,
+      watermelon: 2500,
+      pumpkin: 3000,
+      apple: 3250,
+      bamboo: 4000,
+      coconut: 6000,
+      cactus: 15000,
+      dragonFruit: 50000,
+      mango: 100000,
+      grape: 850000,
+      mushroom: 150000,
+      pepper: 1000000,
+      cacao: 2500000,
+      beanstalk: 10000000,
+      emberLily: 15000000
+    };
+
+    const calculateBtn = document.getElementById("calculateBtn");
+    const fruitSelect = document.getElementById("fruit-select");
+    const resultDiv = document.getElementById("result");
+
+    function calculateSellPrice() {
+      const fruit = fruitSelect.value;
+      let basePrice = basePrices[fruit];
+      if (basePrice === undefined) {
+        resultDiv.textContent = "Please select a valid fruit.";
+        return;
+      }
+      let totalMultiplier = 1;
+      const modifiers = document.querySelectorAll('.modifiers input[type="checkbox"]:checked');
+      modifiers.forEach((checkbox) => {
+        const val =
